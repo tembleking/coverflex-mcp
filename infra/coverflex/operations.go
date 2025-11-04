@@ -61,7 +61,7 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 
 // GetOperations fetches the 5 most recent operations from the API, handling token refresh.
 func (c *Client) GetOperations(authToken, refreshToken string) {
-	slog.Info("\nFetching recent operations...")
+	slog.Info("Fetching recent operations...")
 	req, err := http.NewRequest("GET", operationsURL, nil)
 	if err != nil {
 		slog.Error("Error creating operations request", "error", err)
