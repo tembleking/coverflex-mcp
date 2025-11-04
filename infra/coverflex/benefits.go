@@ -10,8 +10,15 @@ import (
 const benefitsURL = "https://menhir-api.coverflex.com/api/employee/benefits"
 
 // GetBenefits fetches employee benefits from the API, handling token refresh.
-func (c *Client) GetBenefits(authToken, refreshToken string) {
+func (c *Client) GetBenefits() {
 	slog.Info("Fetching employee benefits...")
+
+	tokens, err := c.tokenRepo.GetTokens()
+	if err != nil {
+		slog.Error("Not logged in. Please log in first.", "error", err)
+		return
+	}
+
 	req, err := http.NewRequest("GET", benefitsURL, nil)
 	if err != nil {
 		slog.Error("Error creating benefits request", "error", err)
@@ -19,7 +26,7 @@ func (c *Client) GetBenefits(authToken, refreshToken string) {
 	}
 
 	req.Header.Set("accept", "application/json, text/plain, */*")
-	req.Header.Set("authorization", "Bearer "+authToken)
+	req.Header.Set("authorization", "Bearer "+tokens.AccessToken)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -43,10 +50,10 @@ func (c *Client) GetBenefits(authToken, refreshToken string) {
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired while fetching benefits. Attempting to refresh.")
-		newAuthToken, newRefreshToken := c.RefreshTokens(refreshToken)
+		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			c.GetBenefits(newAuthToken, newRefreshToken)
+			c.GetBenefits()
 		} else {
 			slog.Error("Could not refresh token. Please log in again.")
 			if err := c.tokenRepo.DeleteTokens(); err != nil {

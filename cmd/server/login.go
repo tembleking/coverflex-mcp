@@ -40,10 +40,10 @@ useful when existing tokens are expired or invalid.`,
 				slog.Error("Refresh token file not found. Cannot force refresh. Please log in first.")
 				os.Exit(1)
 			}
-			newAuthToken, newRefreshToken := client.RefreshTokens(tokens.RefreshToken)
+			newAuthToken, _ := client.RefreshTokens(tokens.RefreshToken)
 			if newAuthToken != "" {
 				slog.Info("\nTokens have been refreshed. Let's test the new token:")
-				client.GetOperations(newAuthToken, newRefreshToken)
+				client.GetOperations()
 			} else {
 				slog.Error("Failed to refresh tokens.")
 				os.Exit(1)

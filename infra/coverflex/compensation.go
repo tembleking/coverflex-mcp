@@ -10,8 +10,15 @@ import (
 const compensationURL = "https://menhir-api.coverflex.com/api/employee/compensation"
 
 // GetCompensation fetches employee compensation from the API, handling token refresh.
-func (c *Client) GetCompensation(authToken, refreshToken string) {
+func (c *Client) GetCompensation() {
 	slog.Info("Fetching employee compensation...")
+
+	tokens, err := c.tokenRepo.GetTokens()
+	if err != nil {
+		slog.Error("Not logged in. Please log in first.", "error", err)
+		return
+	}
+
 	req, err := http.NewRequest("GET", compensationURL, nil)
 	if err != nil {
 		slog.Error("Error creating compensation request", "error", err)
@@ -19,7 +26,7 @@ func (c *Client) GetCompensation(authToken, refreshToken string) {
 	}
 
 	req.Header.Set("accept", "application/json, text/plain, */*")
-	req.Header.Set("authorization", "Bearer "+authToken)
+	req.Header.Set("authorization", "Bearer "+tokens.AccessToken)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -43,10 +50,10 @@ func (c *Client) GetCompensation(authToken, refreshToken string) {
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired while fetching compensation. Attempting to refresh.")
-		newAuthToken, newRefreshToken := c.RefreshTokens(refreshToken)
+		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			c.GetCompensation(newAuthToken, newRefreshToken)
+			c.GetCompensation()
 		} else {
 			slog.Error("Could not refresh token. Please log in again.")
 			if err := c.tokenRepo.DeleteTokens(); err != nil {

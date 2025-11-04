@@ -60,8 +60,15 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 }
 
 // GetOperations fetches the 5 most recent operations from the API, handling token refresh.
-func (c *Client) GetOperations(authToken, refreshToken string) {
+func (c *Client) GetOperations() {
 	slog.Info("Fetching recent operations...")
+
+	tokens, err := c.tokenRepo.GetTokens()
+	if err != nil {
+		slog.Error("Not logged in. Please log in first.", "error", err)
+		return
+	}
+
 	req, err := http.NewRequest("GET", operationsURL, nil)
 	if err != nil {
 		slog.Error("Error creating operations request", "error", err)
@@ -70,7 +77,7 @@ func (c *Client) GetOperations(authToken, refreshToken string) {
 
 	req.Header.Set("accept", "application/json, text/plain, */*")
 	req.Header.Set("accept-language", "es-ES,es;q=0.9")
-	req.Header.Set("Authorization", "Bearer "+authToken)
+	req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -94,10 +101,10 @@ func (c *Client) GetOperations(authToken, refreshToken string) {
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired.")
-		newAuthToken, newRefreshToken := c.RefreshTokens(refreshToken)
+		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			c.GetOperations(newAuthToken, newRefreshToken)
+			c.GetOperations()
 		} else {
 			slog.Error("Could not refresh token. Please log in again.")
 			if err := c.tokenRepo.DeleteTokens(); err != nil {
