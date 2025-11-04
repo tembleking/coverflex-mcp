@@ -47,6 +47,12 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 			} else {
 				slog.Info("Compensation data", "compensation", compensation)
 			}
+
+			if family, err := client.GetFamily(); err != nil {
+				slog.Error("Failed to get family information", "error", err)
+			} else {
+				slog.Info("Family data", "family", family)
+			}
 		} else {
 			slog.Info("Token files not found. Please log in using the --user and --pass flags.")
 		}
