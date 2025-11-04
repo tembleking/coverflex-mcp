@@ -37,5 +37,5 @@ func (t *ToolGetBenefits) RegisterInServer(s *server.MCPServer) {
 }
 
 func (t *ToolGetBenefits) CanBeUsed() bool {
-	return t.coverflexClient != nil
+	return t.coverflexClient != nil && t.coverflexClient.IsLoggedIn()
 }
