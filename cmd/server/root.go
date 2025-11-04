@@ -28,8 +28,8 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 		client := coverflex.NewClient(tokenRepo)
 
 		// Default - Use existing tokens
-		tokens, err := tokenRepo.GetTokens()
-		if err == nil {
+		if client.IsLoggedIn() {
+			tokens, _ := tokenRepo.GetTokens() // We know this won't fail
 			slog.Info("Token files found. Reading tokens and fetching operations.")
 			client.GetOperations(tokens.AccessToken, tokens.RefreshToken)
 		} else {

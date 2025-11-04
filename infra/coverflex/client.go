@@ -28,6 +28,12 @@ func NewClient(tokenRepo domain.TokenRepository) *Client {
 	}
 }
 
+// IsLoggedIn checks if the user is logged in by verifying the existence of tokens.
+func (c *Client) IsLoggedIn() bool {
+	_, err := c.tokenRepo.GetTokens()
+	return err == nil
+}
+
 // Structs for JSON payloads
 type sessionRequest struct {
 	Email    string `json:"email"`

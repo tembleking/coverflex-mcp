@@ -52,7 +52,7 @@ useful when existing tokens are expired or invalid.`,
 		}
 
 		// Check if already logged in
-		if _, err := tokenRepo.GetTokens(); err == nil {
+		if client.IsLoggedIn() {
 			slog.Info("You are already logged in. Use --force-refresh to log in again.")
 			return
 		}
