@@ -9,12 +9,40 @@ import (
 
 const compensationURL = "https://menhir-api.coverflex.com/api/employee/compensation"
 
+// Balance represents the balance of an attribution or benefit.
+type Balance struct {
+	Amount   int    `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+// Attribution represents a type of compensation attribution.
+type Attribution struct {
+	ID      string  `json:"id"`
+	Slug    string  `json:"slug"`
+	Balance Balance `json:"balance"`
+}
+
+// CompensationBenefit represents a benefit within the compensation summary.
+type CompensationBenefit struct {
+	Slug    string  `json:"slug"`
+	Balance Balance `json:"balance"`
+}
+
+// CompensationSummary is the main data structure for the compensation summary.
+type CompensationSummary struct {
+	Attributions []Attribution       `json:"attributions"`
+	Benefits     []CompensationBenefit `json:"benefits"`
+	RenewalDate  string              `json:"renewal_date"`
+	Status       string              `json:"status"`
+}
+
+// CompensationResponse is the top-level structure for the compensation API response.
 type CompensationResponse struct {
-	Summary map[string]interface{} `json:"summary"`
+	Summary CompensationSummary `json:"summary"`
 }
 
 // GetCompensation fetches employee compensation from the API, handling token refresh.
-func (c *Client) GetCompensation() (map[string]interface{}, error) {
+func (c *Client) GetCompensation() (*CompensationSummary, error) {
 	slog.Info("Fetching employee compensation...")
 
 	tokens, err := c.tokenRepo.GetTokens()
@@ -50,7 +78,7 @@ func (c *Client) GetCompensation() (map[string]interface{}, error) {
 			slog.Error("Error decoding compensation response", "error", err)
 			return nil, err
 		}
-		return compensationResponse.Summary, nil
+		return &compensationResponse.Summary, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired while fetching compensation. Attempting to refresh.")
