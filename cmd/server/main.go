@@ -2,16 +2,17 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/tembleking/coverflex-mcp/infra/coverflex"
 	"github.com/tembleking/coverflex-mcp/infra/fs"
 )
 
 func main() {
-	tokenRepo := fs.NewTokenRepository()
-	client := coverflex.NewClient(tokenRepo)
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	tokenRepo := fs.NewTokenRepository(logger)
+	client := coverflex.NewClient(tokenRepo, logger)
 
 	// --- Flag Definitions ---
 	user := flag.String("user", "", "Your Coverflex email")
@@ -25,47 +26,51 @@ func main() {
 
 	// Case 1: Force Refresh
 	if *forceRefresh {
-		fmt.Println("Force refresh option detected.")
+		logger.Info("Force refresh option detected.")
 		tokens, err := tokenRepo.GetTokens()
 		if err != nil {
-			log.Fatalf("Refresh token file not found. Cannot force refresh. Please log in first.")
+			logger.Error("Refresh token file not found. Cannot force refresh. Please log in first.")
+			os.Exit(1)
 		}
 		newAuthToken, newRefreshToken := client.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
-			fmt.Println("\nTokens have been refreshed. Let's test the new token:")
+			logger.Info("\nTokens have been refreshed. Let's test the new token:")
 			client.GetOperations(newAuthToken, newRefreshToken)
 		} else {
-			log.Fatalf("Failed to refresh tokens.")
+			logger.Error("Failed to refresh tokens.")
+			os.Exit(1)
 		}
 		return
 	}
 
 	// Case 2: Login with OTP
 	if *user != "" && *pass != "" && *otp != "" {
-		fmt.Println("User, password, and OTP provided. Attempting to log in...")
+		logger.Info("User, password, and OTP provided. Attempting to log in...")
 		if err := client.Login(*user, *pass, *otp); err != nil {
-			log.Fatalf("Login failed: %v", err)
+			logger.Error("Login failed", "error", err)
+			os.Exit(1)
 		}
-		fmt.Println("Logged in.")
+		logger.Info("Logged in.")
 		return
 	}
 
 	// Case 3: Request OTP
 	if *user != "" && *pass != "" {
-		fmt.Println("User and password provided. Requesting OTP...")
+		logger.Info("User and password provided. Requesting OTP...")
 		if err := client.RequestOTP(*user, *pass); err != nil {
-			log.Fatalf("Failed to request OTP: %v", err)
+			logger.Error("Failed to request OTP", "error", err)
+			os.Exit(1)
 		}
-		fmt.Println("An OTP has been sent to your phone. Please re-run the command with the --otp flag.")
+		logger.Info("An OTP has been sent to your phone. Please re-run the command with the --otp flag.")
 		return
 	}
 
 	// Case 4: Default - Use existing tokens
 	tokens, err := tokenRepo.GetTokens()
 	if err == nil {
-		fmt.Println("Token files found. Reading tokens and fetching operations.")
+		logger.Info("Token files found. Reading tokens and fetching operations.")
 		client.GetOperations(tokens.AccessToken, tokens.RefreshToken)
 	} else {
-		fmt.Println("Token files not found. Please log in using the --user and --pass flags.")
+		logger.Info("Token files not found. Please log in using the --user and --pass flags.")
 	}
 }

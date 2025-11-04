@@ -2,6 +2,7 @@ package fs
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,14 +19,16 @@ const (
 type TokenRepository struct {
 	tokenPath        string
 	refreshTokenPath string
+	logger           *slog.Logger
 }
 
 // NewTokenRepository creates a new filesystem token repository.
-func NewTokenRepository() *TokenRepository {
+func NewTokenRepository(logger *slog.Logger) *TokenRepository {
 	tmpDir := os.TempDir()
 	return &TokenRepository{
 		tokenPath:        filepath.Join(tmpDir, tokenFileName),
 		refreshTokenPath: filepath.Join(tmpDir, refreshTokenFileName),
+		logger:           logger,
 	}
 }
 
@@ -59,13 +62,13 @@ func (r *TokenRepository) SaveTokens(accessToken, refreshToken string) error {
 	if err := os.WriteFile(r.tokenPath, []byte(accessToken), 0600); err != nil {
 		return fmt.Errorf("error saving auth token: %w", err)
 	}
-	fmt.Printf("Auth token saved to %s\n", r.tokenPath)
+	r.logger.Info("Auth token saved", "path", r.tokenPath)
 
 	if refreshToken != "" {
 		if err := os.WriteFile(r.refreshTokenPath, []byte(refreshToken), 0600); err != nil {
 			return fmt.Errorf("error saving refresh token: %w", err)
 		}
-		fmt.Printf("Refresh token saved to %s\n", r.refreshTokenPath)
+		r.logger.Info("Refresh token saved", "path", r.refreshTokenPath)
 	}
 	return nil
 }

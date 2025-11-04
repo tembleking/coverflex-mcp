@@ -1,6 +1,7 @@
 package coverflex
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/tembleking/coverflex-mcp/domain"
@@ -18,13 +19,15 @@ const (
 type Client struct {
 	httpClient *http.Client
 	tokenRepo  domain.TokenRepository
+	logger     *slog.Logger
 }
 
 // NewClient creates a new Coverflex API client.
-func NewClient(tokenRepo domain.TokenRepository) *Client {
+func NewClient(tokenRepo domain.TokenRepository, logger *slog.Logger) *Client {
 	return &Client{
 		httpClient: &http.Client{},
 		tokenRepo:  tokenRepo,
+		logger:     logger,
 	}
 }
 
