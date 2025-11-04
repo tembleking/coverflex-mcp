@@ -24,12 +24,14 @@ useful when existing tokens are expired or invalid.`,
 		logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 		slog.SetDefault(logger)
 
-		tokenRepo := fs.NewTokenRepository()
+	
+tokenRepo := fs.NewTokenRepository()
 		client := coverflex.NewClient(tokenRepo)
 
 		user, _ := cmd.Flags().GetString("user")
 		pass, _ := cmd.Flags().GetString("pass")
-		otp, _ := cmd.Flags().GetString("otp")
+	
+otp, _ := cmd.Flags().GetString("otp")
 		forceRefresh, _ := cmd.Flags().GetBool("force-refresh")
 
 		// Case 1: Force Refresh
@@ -43,11 +45,10 @@ useful when existing tokens are expired or invalid.`,
 			newAuthToken, _ := client.RefreshTokens(tokens.RefreshToken)
 			if newAuthToken != "" {
 				slog.Info("\nTokens have been refreshed. Let's test the new token:")
-				params := coverflex.GetOperationsParams{
-					Page:    1,
-					PerPage: 5,
-				}
-				if operations, err := client.GetOperations(params); err != nil {
+				if operations, err := client.GetOperations(
+					coverflex.WithOperationsPage(1),
+					coverflex.WithOperationsPerPage(5),
+				); err != nil {
 					slog.Error("Failed to get operations", "error", err)
 				} else {
 					slog.Info("Operations data", "operations", operations)

@@ -56,6 +56,34 @@ type GetOperationsParams struct {
 	Filters OperationsFilters
 }
 
+// GetOperationsOption defines a function that modifies GetOperationsParams.
+type GetOperationsOption func(*GetOperationsParams)
+
+// WithOperationsPage sets the page number for the operations request.
+func WithOperationsPage(page int) GetOperationsOption {
+	return func(params *GetOperationsParams) {
+		if page > 0 {
+			params.Page = page
+		}
+	}
+}
+
+// WithOperationsPerPage sets the number of operations to return per page.
+func WithOperationsPerPage(perPage int) GetOperationsOption {
+	return func(params *GetOperationsParams) {
+		if perPage > 0 {
+			params.PerPage = perPage
+		}
+	}
+}
+
+// WithOperationsFilterType sets the type filter for the operations request.
+func WithOperationsFilterType(filterType string) GetOperationsOption {
+	return func(params *GetOperationsParams) {
+		params.Filters.Type = filterType
+	}
+}
+
 // RefreshTokens handles the token refresh logic.
 func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshToken string) {
 	slog.Info("Attempting to refresh tokens...")
@@ -109,8 +137,19 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 }
 
 // GetOperations fetches operations from the API, handling token refresh and pagination/filters.
-func (c *Client) GetOperations(params GetOperationsParams) ([]Operation, error) {
+func (c *Client) GetOperations(opts ...GetOperationsOption) ([]Operation, error) {
 	slog.Info("Fetching recent operations...")
+
+	// Set default parameters
+	params := &GetOperationsParams{
+		Page:    1,
+		PerPage: 5,
+	}
+
+	// Apply all the options
+	for _, opt := range opts {
+		opt(params)
+	}
 
 	tokens, err := c.tokenRepo.GetTokens()
 	if err != nil {
@@ -171,7 +210,7 @@ func (c *Client) GetOperations(params GetOperationsParams) ([]Operation, error) 
 		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			return c.GetOperations(params)
+			return c.GetOperations(opts...)
 		}
 
 		err := c.tokenRepo.DeleteTokens()

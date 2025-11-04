@@ -31,22 +31,20 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 		if client.IsLoggedIn() {
 			slog.Info("Token files found. Reading tokens and fetching data.")
 			// Fetch operations with pagination and a filter example
-			filteredParams := coverflex.GetOperationsParams{
-				Page:    1,
-				PerPage: 5,
-				Filters: coverflex.OperationsFilters{Type: "benefit_expense"},
-			}
-			if operations, err := client.GetOperations(filteredParams); err != nil {
+			if operations, err := client.GetOperations(
+				coverflex.WithOperationsPage(1),
+				coverflex.WithOperationsPerPage(5),
+				coverflex.WithOperationsFilterType("benefit_expense"),
+			); err != nil {
 				slog.Error("Failed to get operations", "error", err)
 			} else {
 				slog.Info("Operations data (filtered)", "operations", operations)
 			}
 
-			allParams := coverflex.GetOperationsParams{
-				Page:    1,
-				PerPage: 5,
-			}
-			if operations, err := client.GetOperations(allParams); err != nil {
+			if operations, err := client.GetOperations(
+				coverflex.WithOperationsPage(1),
+				coverflex.WithOperationsPerPage(5),
+			); err != nil {
 				slog.Error("Failed to get operations", "error", err)
 			} else {
 				slog.Info("Operations data (all)", "operations", operations)
