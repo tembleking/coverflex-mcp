@@ -15,8 +15,8 @@ type Amount struct {
 
 // DescriptionParam provides details for an operation's description.
 type DescriptionParam struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
 }
 
 // Operation represents a single financial operation.
