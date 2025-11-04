@@ -28,28 +28,7 @@ to quickly create a Cobra application.`,
 		tokenRepo := fs.NewTokenRepository()
 		client := coverflex.NewClient(tokenRepo)
 
-		forceRefresh, _ := cmd.Flags().GetBool("force-refresh")
-
-		// Case 1: Force Refresh
-		if forceRefresh {
-			slog.Info("Force refresh option detected.")
-			tokens, err := tokenRepo.GetTokens()
-			if err != nil {
-				slog.Error("Refresh token file not found. Cannot force refresh. Please log in first.")
-				os.Exit(1)
-			}
-			newAuthToken, newRefreshToken := client.RefreshTokens(tokens.RefreshToken)
-			if newAuthToken != "" {
-				slog.Info("\nTokens have been refreshed. Let's test the new token:")
-				client.GetOperations(newAuthToken, newRefreshToken)
-			} else {
-				slog.Error("Failed to refresh tokens.")
-				os.Exit(1)
-			}
-			return
-		}
-
-		// Case 4: Default - Use existing tokens
+		// Default - Use existing tokens
 		tokens, err := tokenRepo.GetTokens()
 		if err == nil {
 			slog.Info("Token files found. Reading tokens and fetching operations.")
@@ -75,8 +54,6 @@ func init() {
 	// will be global for your application.
 
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.coverflex-mcp.yaml)")
-
-	rootCmd.Flags().Bool("force-refresh", false, "Force a refresh of the authentication tokens")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

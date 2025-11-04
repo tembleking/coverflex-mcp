@@ -13,7 +13,7 @@ import (
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Log in to Coverflex",
-	Long:  `This command allows you to log in to Coverflex using your email, password, and an optional OTP.`,
+	Long:  `This command allows you to log in to Coverflex using your email, password, and an optional OTP. Use --force-refresh to renew tokens.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 		slog.SetDefault(logger)
@@ -24,6 +24,26 @@ var loginCmd = &cobra.Command{
 		user, _ := cmd.Flags().GetString("user")
 		pass, _ := cmd.Flags().GetString("pass")
 		otp, _ := cmd.Flags().GetString("otp")
+		forceRefresh, _ := cmd.Flags().GetBool("force-refresh")
+
+		// Case 1: Force Refresh
+		if forceRefresh {
+			slog.Info("Force refresh option detected.")
+			tokens, err := tokenRepo.GetTokens()
+			if err != nil {
+				slog.Error("Refresh token file not found. Cannot force refresh. Please log in first.")
+				os.Exit(1)
+			}
+			newAuthToken, newRefreshToken := client.RefreshTokens(tokens.RefreshToken)
+			if newAuthToken != "" {
+				slog.Info("\nTokens have been refreshed. Let's test the new token:")
+				client.GetOperations(newAuthToken, newRefreshToken)
+			} else {
+				slog.Error("Failed to refresh tokens.")
+				os.Exit(1)
+			}
+			return
+		}
 
 		if user != "" && pass != "" && otp != "" {
 			slog.Info("User, password, and OTP provided. Attempting to log in...")
@@ -56,6 +76,7 @@ func init() {
 	loginCmd.Flags().String("user", "", "Your Coverflex email")
 	loginCmd.Flags().String("pass", "", "Your Coverflex password")
 	loginCmd.Flags().StringP("otp", "o", "", "The OTP you received via SMS")
+	loginCmd.Flags().Bool("force-refresh", false, "Force a refresh of the authentication tokens")
 
 	// Here you will define your flags and configuration settings.
 
