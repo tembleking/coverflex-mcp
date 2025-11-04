@@ -2,6 +2,8 @@ package coverflex
 
 import (
 	"net/http"
+
+	"github.com/tembleking/coverflex-mcp/domain"
 )
 
 // API endpoints
@@ -15,12 +17,14 @@ const (
 // Client is the Coverflex API client.
 type Client struct {
 	httpClient *http.Client
+	tokenRepo  domain.TokenRepository
 }
 
 // NewClient creates a new Coverflex API client.
-func NewClient() *Client {
+func NewClient(tokenRepo domain.TokenRepository) *Client {
 	return &Client{
 		httpClient: &http.Client{},
+		tokenRepo:  tokenRepo,
 	}
 }
 

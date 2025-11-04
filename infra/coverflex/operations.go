@@ -6,8 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 )
 
 // RefreshTokens handles the token refresh logic.
@@ -53,17 +51,9 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 		return "", ""
 	}
 
-	// Save new tokens
-	tmpDir := os.TempDir()
-	tokenPath := filepath.Join(tmpDir, "coverflex_token.txt")
-	refreshTokenPath := filepath.Join(tmpDir, "coverflex_refresh_token.txt")
-
-	if err := os.WriteFile(tokenPath, []byte(newAuthToken), 0600); err != nil {
-		log.Printf("Error saving new auth token: %v", err)
+	if err := c.tokenRepo.SaveTokens(newAuthToken, newRefreshToken); err != nil {
+		log.Printf("Error saving new tokens: %v", err)
 		// Continue anyway, as we have the tokens in memory
-	}
-	if err := os.WriteFile(refreshTokenPath, []byte(newRefreshToken), 0600); err != nil {
-		log.Printf("Error saving new refresh token: %v", err)
 	}
 
 	fmt.Println("Tokens refreshed and saved successfully.")
@@ -117,13 +107,8 @@ func (c *Client) GetOperations(authToken, refreshToken string) {
 			c.GetOperations(newAuthToken, newRefreshToken)
 		} else {
 			fmt.Println("Could not refresh token. Please log in again.")
-			// Optionally, delete the expired token files
-			tmpDir := os.TempDir()
-			if err := os.Remove(filepath.Join(tmpDir, "coverflex_token.txt")); err != nil {
-				log.Printf("Warning: failed to remove token file: %v", err)
-			}
-			if err := os.Remove(filepath.Join(tmpDir, "coverflex_refresh_token.txt")); err != nil {
-				log.Printf("Warning: failed to remove refresh token file: %v", err)
+			if err := c.tokenRepo.DeleteTokens(); err != nil {
+				log.Printf("Warning: failed to remove token files: %v", err)
 			}
 		}
 	default:

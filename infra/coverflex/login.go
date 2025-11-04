@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -138,20 +137,8 @@ func (c *Client) Login() {
 	}
 
 	// Step 4: Save tokens to files
-	tmpDir := os.TempDir()
-	tokenPath := filepath.Join(tmpDir, "coverflex_token.txt")
-	refreshTokenPath := filepath.Join(tmpDir, "coverflex_refresh_token.txt")
-
-	if err := os.WriteFile(tokenPath, []byte(authToken), 0600); err != nil {
-		log.Fatalf("Error saving auth token: %v", err)
-	}
-	fmt.Printf("Auth token saved to %s\n", tokenPath)
-
-	if refreshToken != "" {
-		if err := os.WriteFile(refreshTokenPath, []byte(refreshToken), 0600); err != nil {
-			log.Fatalf("Error saving refresh token: %v", err)
-		}
-		fmt.Printf("Refresh token saved to %s\n", refreshTokenPath)
+	if err := c.tokenRepo.SaveTokens(authToken, refreshToken); err != nil {
+		log.Fatalf("Error saving tokens: %v", err)
 	}
 
 	// Step 5: Fetch operations after logging in
