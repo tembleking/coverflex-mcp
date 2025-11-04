@@ -43,7 +43,12 @@ useful when existing tokens are expired or invalid.`,
 			newAuthToken, _ := client.RefreshTokens(tokens.RefreshToken)
 			if newAuthToken != "" {
 				slog.Info("\nTokens have been refreshed. Let's test the new token:")
-									if operations, err := client.GetOperations(1, 5, nil); err != nil {					slog.Error("Failed to get operations", "error", err)
+				params := coverflex.GetOperationsParams{
+					Page:    1,
+					PerPage: 5,
+				}
+				if operations, err := client.GetOperations(params); err != nil {
+					slog.Error("Failed to get operations", "error", err)
 				} else {
 					slog.Info("Operations data", "operations", operations)
 				}

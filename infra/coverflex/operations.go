@@ -44,6 +44,18 @@ type OperationsResponse struct {
 	} `json:"operations"`
 }
 
+// OperationsFilters holds the filter parameters for GetOperations.
+type OperationsFilters struct {
+	Type string
+}
+
+// GetOperationsParams holds the parameters for the GetOperations method.
+type GetOperationsParams struct {
+	Page    int
+	PerPage int
+	Filters OperationsFilters
+}
+
 // RefreshTokens handles the token refresh logic.
 func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshToken string) {
 	slog.Info("Attempting to refresh tokens...")
@@ -97,7 +109,7 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 }
 
 // GetOperations fetches operations from the API, handling token refresh and pagination/filters.
-func (c *Client) GetOperations(page, perPage int, filters map[string]string) ([]Operation, error) {
+func (c *Client) GetOperations(params GetOperationsParams) ([]Operation, error) {
 	slog.Info("Fetching recent operations...")
 
 	tokens, err := c.tokenRepo.GetTokens()
@@ -112,17 +124,17 @@ func (c *Client) GetOperations(page, perPage int, filters map[string]string) ([]
 		slog.Error("Error parsing operations URL", "error", err)
 		return nil, err
 	}
-	params := url.Values{}
-	if page > 0 {
-		params.Add("page", strconv.Itoa(page))
+	queryParams := url.Values{}
+	if params.Page > 0 {
+		queryParams.Add("page", strconv.Itoa(params.Page))
 	}
-	if perPage > 0 {
-		params.Add("per_page", strconv.Itoa(perPage))
+	if params.PerPage > 0 {
+		queryParams.Add("per_page", strconv.Itoa(params.PerPage))
 	}
-	for key, value := range filters {
-		params.Add(fmt.Sprintf("filters[%s]", key), value)
+	if params.Filters.Type != "" {
+		queryParams.Add(fmt.Sprintf("filters[%s]", "type"), params.Filters.Type)
 	}
-	baseURL.RawQuery = params.Encode()
+	baseURL.RawQuery = queryParams.Encode()
 
 	req, err := http.NewRequest("GET", baseURL.String(), nil)
 	if err != nil {
@@ -159,7 +171,7 @@ func (c *Client) GetOperations(page, perPage int, filters map[string]string) ([]
 		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			return c.GetOperations(page, perPage, filters)
+			return c.GetOperations(params)
 		}
 
 		err := c.tokenRepo.DeleteTokens()
