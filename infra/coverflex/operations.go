@@ -7,6 +7,12 @@ import (
 	"net/http"
 )
 
+type OperationsResponse struct {
+	Operations struct {
+		List []map[string]interface{} `json:"list"`
+	} `json:"operations"`
+}
+
 // RefreshTokens handles the token refresh logic.
 func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshToken string) {
 	slog.Info("Attempting to refresh tokens...")
@@ -92,14 +98,12 @@ func (c *Client) GetOperations() ([]map[string]interface{}, error) {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var response struct {
-			Data []map[string]interface{} `json:"data"`
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		var opsResponse OperationsResponse
+		if err := json.NewDecoder(resp.Body).Decode(&opsResponse); err != nil {
 			slog.Error("Error decoding operations response", "error", err)
 			return nil, err
 		}
-		return response.Data, nil
+		return opsResponse.Operations.List, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired.")

@@ -9,6 +9,10 @@ import (
 
 const benefitsURL = "https://menhir-api.coverflex.com/api/employee/benefits"
 
+type BenefitsResponse struct {
+	Benefits []map[string]interface{} `json:"benefits"`
+}
+
 // GetBenefits fetches employee benefits from the API, handling token refresh.
 func (c *Client) GetBenefits() ([]map[string]interface{}, error) {
 	slog.Info("Fetching employee benefits...")
@@ -41,14 +45,12 @@ func (c *Client) GetBenefits() ([]map[string]interface{}, error) {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var response struct {
-			Data []map[string]interface{} `json:"data"`
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		var benefitsResponse BenefitsResponse
+		if err := json.NewDecoder(resp.Body).Decode(&benefitsResponse); err != nil {
 			slog.Error("Error decoding benefits response", "error", err)
 			return nil, err
 		}
-		return response.Data, nil
+		return benefitsResponse.Benefits, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired while fetching benefits. Attempting to refresh.")

@@ -9,6 +9,10 @@ import (
 
 const compensationURL = "https://menhir-api.coverflex.com/api/employee/compensation"
 
+type CompensationResponse struct {
+	Summary map[string]interface{} `json:"summary"`
+}
+
 // GetCompensation fetches employee compensation from the API, handling token refresh.
 func (c *Client) GetCompensation() (map[string]interface{}, error) {
 	slog.Info("Fetching employee compensation...")
@@ -41,14 +45,12 @@ func (c *Client) GetCompensation() (map[string]interface{}, error) {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var response struct {
-			Data map[string]interface{} `json:"data"`
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		var compensationResponse CompensationResponse
+		if err := json.NewDecoder(resp.Body).Decode(&compensationResponse); err != nil {
 			slog.Error("Error decoding compensation response", "error", err)
 			return nil, err
 		}
-		return response.Data, nil
+		return compensationResponse.Summary, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired while fetching compensation. Attempting to refresh.")
