@@ -92,14 +92,12 @@ func (c *Client) GetOperations() ([]map[string]interface{}, error) {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var response struct {
-			Data []map[string]interface{} `json:"data"`
-		}
-		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		var data []map[string]interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 			slog.Error("Error decoding operations response", "error", err)
 			return nil, err
 		}
-		return response.Data, nil
+		return data, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired.")
