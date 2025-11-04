@@ -41,12 +41,14 @@ func (c *Client) GetBenefits() ([]map[string]interface{}, error) {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var data []map[string]interface{}
-		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		var response struct {
+			Data []map[string]interface{} `json:"data"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 			slog.Error("Error decoding benefits response", "error", err)
 			return nil, err
 		}
-		return data, nil
+		return response.Data, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired while fetching benefits. Attempting to refresh.")
