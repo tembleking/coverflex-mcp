@@ -1,13 +1,6 @@
 package coverflex
 
-import (
-	"encoding/json"
-	"io"
-	"log/slog"
-	"net/http"
-)
-
-const compensationURL = "https://menhir-api.coverflex.com/api/employee/compensation"
+import "log/slog"
 
 // Balance represents the balance of an attribution or benefit.
 type Balance struct {
@@ -48,58 +41,10 @@ type CompensationResponse struct {
 func (c *Client) GetCompensation() (*CompensationSummary, error) {
 	slog.Info("Fetching employee compensation...")
 
-	tokens, err := c.tokenRepo.GetTokens()
-	if err != nil {
-		slog.Error("Not logged in. Please log in first.", "error", err)
+	var response CompensationResponse
+	if err := c.get("https://menhir-api.coverflex.com/api/employee/compensation", &response); err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", compensationURL, nil)
-	if err != nil {
-		slog.Error("Error creating compensation request", "error", err)
-		return nil, err
-	}
-
-	req.Header.Set("accept", "application/json, text/plain, */*")
-	req.Header.Set("authorization", "Bearer "+tokens.AccessToken)
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		slog.Error("Error fetching compensation", "error", err)
-		return nil, err
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			slog.Warn("failed to close compensation response body", "error", err)
-		}
-	}()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		var compensationResponse CompensationResponse
-		if err := json.NewDecoder(resp.Body).Decode(&compensationResponse); err != nil {
-			slog.Error("Error decoding compensation response", "error", err)
-			return nil, err
-		}
-		return &compensationResponse.Summary, nil
-
-	case http.StatusUnauthorized:
-		slog.Info("Token expired while fetching compensation. Attempting to refresh.")
-		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
-		if newAuthToken != "" {
-			// Retry the request with the new token
-			return c.GetCompensation()
-		}
-
-		err := c.tokenRepo.DeleteTokens()
-		if err != nil {
-			slog.Warn("failed to remove token files", "error", err)
-		}
-		return nil, err
-
-	default:
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		slog.Error("An HTTP error occurred while fetching compensation", "status_code", resp.StatusCode, "response", string(bodyBytes))
-		return nil, err
-	}
+	return &response.Summary, nil
 }

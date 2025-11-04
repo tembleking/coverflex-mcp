@@ -143,28 +143,17 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 func (c *Client) GetOperations(opts ...GetOperationsOption) ([]Operation, error) {
 	slog.Info("Fetching recent operations...")
 
-	// Set default parameters
 	params := &GetOperationsParams{
 		Page:    1,
 		PerPage: 5,
 	}
-
-	// Apply all the options
 	for _, opt := range opts {
 		opt(params)
 	}
 
-	tokens, err := c.tokenRepo.GetTokens()
-	if err != nil {
-		slog.Error("Not logged in. Please log in first.", "error", err)
-		return nil, err
-	}
-
-	// Build URL with query parameters
 	baseURL, err := url.Parse(operationsURL)
 	if err != nil {
-		slog.Error("Error parsing operations URL", "error", err)
-		return nil, err
+		return nil, fmt.Errorf("error parsing operations URL: %w", err)
 	}
 	queryParams := url.Values{}
 	if params.Page > 0 {
@@ -178,53 +167,10 @@ func (c *Client) GetOperations(opts ...GetOperationsOption) ([]Operation, error)
 	}
 	baseURL.RawQuery = queryParams.Encode()
 
-	req, err := http.NewRequest("GET", baseURL.String(), nil)
-	if err != nil {
-		slog.Error("Error creating operations request", "error", err)
+	var response OperationsResponse
+	if err := c.get(baseURL.String(), &response); err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("accept", "application/json, text/plain, */*")
-	req.Header.Set("accept-language", "es-ES,es;q=0.9")
-	req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		slog.Error("Error fetching operations", "error", err)
-		return nil, err
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			slog.Warn("failed to close operations response body", "error", err)
-		}
-	}()
-
-	switch resp.StatusCode {
-	case http.StatusOK:
-		var opsResponse OperationsResponse
-		if err := json.NewDecoder(resp.Body).Decode(&opsResponse); err != nil {
-			slog.Error("Error decoding operations response", "error", err)
-			return nil, err
-		}
-		return opsResponse.Operations.List, nil
-
-	case http.StatusUnauthorized:
-		slog.Info("Token expired.")
-		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
-		if newAuthToken != "" {
-			// Retry the request with the new token
-			return c.GetOperations(opts...)
-		}
-
-		err := c.tokenRepo.DeleteTokens()
-		if err != nil {
-			slog.Warn("failed to remove token files", "error", err)
-		}
-		return nil, err
-
-	default:
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		slog.Error("An HTTP error occurred", "status_code", resp.StatusCode, "response", string(bodyBytes))
-		return nil, err
-	}
+	return response.Operations.List, nil
 }
