@@ -35,6 +35,7 @@
                 ginkgo
                 golangci-lint
                 govulncheck
+                cobra-cli
               ];
             };
 
