@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
@@ -28,7 +29,7 @@ func (c *Client) RequestOTP(email, password string) error {
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			c.logger.Warn("failed to close response body", "error", err)
+			slog.Warn("failed to close response body", "error", err)
 		}
 	}()
 
@@ -37,7 +38,7 @@ func (c *Client) RequestOTP(email, password string) error {
 		if err := json.NewDecoder(resp.Body).Decode(&otpResp); err != nil {
 			return fmt.Errorf("error decoding OTP response: %w", err)
 		}
-		c.logger.Info("OTP sent to phone", "phone_last_digits", otpResp.PhoneLastDigits)
+		slog.Info("OTP sent to phone", "phone_last_digits", otpResp.PhoneLastDigits)
 		return nil
 	}
 
@@ -62,7 +63,7 @@ func (c *Client) Login(email, password, otp string) error {
 }
 
 func (c *Client) submitOTP(email, password, otp string) (string, string, error) {
-	c.logger.Info("Submitting OTP...")
+	slog.Info("Submitting OTP...")
 	payload := sessionRequest{Email: email, Password: password, OTP: otp}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -81,7 +82,7 @@ func (c *Client) submitOTP(email, password, otp string) (string, string, error) 
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			c.logger.Warn("failed to close response body", "error", err)
+			slog.Warn("failed to close response body", "error", err)
 		}
 	}()
 
@@ -99,15 +100,15 @@ func (c *Client) submitOTP(email, password, otp string) (string, string, error) 
 		return "", "", fmt.Errorf("failed to retrieve auth token")
 	}
 
-	c.logger.Info("Successfully authenticated.")
+	slog.Info("Successfully authenticated.")
 	return tokens.Token, tokens.RefreshToken, nil
 }
 
 func (c *Client) trustDevice(authToken, refreshToken string) (string, string) {
-	c.logger.Info("Trusting this device...")
+	slog.Info("Trusting this device...")
 	req, err := http.NewRequest("POST", trustURL, nil)
 	if err != nil {
-		c.logger.Warn("Error creating trust request", "error", err)
+		slog.Warn("Error creating trust request", "error", err)
 		return authToken, refreshToken
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -115,21 +116,21 @@ func (c *Client) trustDevice(authToken, refreshToken string) (string, string) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		c.logger.Warn("Error trusting device", "error", err)
+		slog.Warn("Error trusting device", "error", err)
 		return authToken, refreshToken
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			c.logger.Warn("failed to close response body", "error", err)
+			slog.Warn("failed to close response body", "error", err)
 		}
 	}()
 
 	if resp.StatusCode == http.StatusCreated { // 201
-		c.logger.Info("Device trusted successfully.")
+		slog.Info("Device trusted successfully.")
 		var newTokens tokenResponse
 		if err := json.NewDecoder(resp.Body).Decode(&newTokens); err == nil {
 			if newTokens.UserAgentToken != "" {
-				c.logger.Info("Received user agent token for long-term session.")
+				slog.Info("Received user agent token for long-term session.")
 			}
 			return newTokens.Token, newTokens.RefreshToken
 		}
