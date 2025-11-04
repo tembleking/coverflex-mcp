@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/tembleking/coverflex-mcp/infra/coverflex"
 	"github.com/tembleking/coverflex-mcp/infra/fs"
+	"github.com/tembleking/coverflex-mcp/infra/mcp"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -25,60 +27,23 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 		tokenRepo := fs.NewTokenRepository()
 		client := coverflex.NewClient(tokenRepo)
 
-		// Default - Use existing tokens
-		if client.IsLoggedIn() {
-			slog.Info("Token files found. Reading tokens and fetching data.")
-			// Fetch operations with pagination and a filter example
-			if operations, err := client.GetOperations(
-				coverflex.WithOperationsPage(1),
-				coverflex.WithOperationsPerPage(5),
-				coverflex.WithOperationsFilterType("benefit_expense"),
-			); err != nil {
-				slog.Error("Failed to get operations", "error", err)
-			} else {
-				slog.Info("Operations data (filtered)", "operations", operations)
-			}
+		if !client.IsLoggedIn() {
+			slog.Info("Token files not found. Please log in using the 'login' command.")
+			return
+		}
 
-			if operations, err := client.GetOperations(
-				coverflex.WithOperationsPage(1),
-				coverflex.WithOperationsPerPage(5),
-			); err != nil {
-				slog.Error("Failed to get operations", "error", err)
-			} else {
-				slog.Info("Operations data (all)", "operations", operations)
-			}
+		handler := mcp.NewHandlerWithTools(
+			mcp.NewToolGetBenefits(client),
+			mcp.NewToolGetCards(client),
+			mcp.NewToolGetCompany(client),
+			mcp.NewToolGetCompensation(client),
+			mcp.NewToolGetFamily(client),
+			mcp.NewToolGetOperations(client),
+		)
 
-			if benefits, err := client.GetBenefits(); err != nil {
-				slog.Error("Failed to get benefits", "error", err)
-			} else {
-				slog.Info("Benefits data", "benefits", benefits)
-			}
-
-			if compensation, err := client.GetCompensation(); err != nil {
-				slog.Error("Failed to get compensation", "error", err)
-			} else {
-				slog.Info("Compensation data", "compensation", compensation)
-			}
-
-			if family, err := client.GetFamily(); err != nil {
-				slog.Error("Failed to get family information", "error", err)
-			} else {
-				slog.Info("Family data", "family", family)
-			}
-
-			if cards, err := client.GetCards(); err != nil {
-				slog.Error("Failed to get cards information", "error", err)
-			} else {
-				slog.Info("Cards data", "cards", cards)
-			}
-
-			if company, err := client.GetCompany(); err != nil {
-				slog.Error("Failed to get company information", "error", err)
-			} else {
-				slog.Info("Company data", "company", company)
-			}
-		} else {
-			slog.Info("Token files not found. Please log in using the --user and --pass flags.")
+		if err := handler.ServeStdio(context.Background(), os.Stdin, os.Stdout); err != nil {
+			slog.Error("MCP server error", "error", err)
+			os.Exit(1)
 		}
 	},
 }
