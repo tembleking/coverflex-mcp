@@ -90,12 +90,7 @@ func (c *Client) GetOperations(authToken, refreshToken string) {
 			slog.Error("Error decoding operations response", "error", err)
 			return
 		}
-		prettyJSON, err := json.MarshalIndent(result, "", "  ")
-		if err != nil {
-			slog.Error("Error formatting JSON", "error", err)
-			return
-		}
-		slog.Info("Operations data:", "operations", string(prettyJSON))
+		slog.Info("Operations data", "operations", result)
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired.")
