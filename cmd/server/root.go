@@ -30,10 +30,18 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 		// Default - Use existing tokens
 		if client.IsLoggedIn() {
 			slog.Info("Token files found. Reading tokens and fetching data.")
-			if operations, err := client.GetOperations(); err != nil {
+			// Fetch operations with pagination and a filter example
+			opFilters := map[string]string{"type": "benefit_expense"}
+			if operations, err := client.GetOperations(1, 5, opFilters); err != nil {
 				slog.Error("Failed to get operations", "error", err)
 			} else {
-				slog.Info("Operations data", "operations", operations)
+				slog.Info("Operations data (filtered)", "operations", operations)
+			}
+
+			if operations, err := client.GetOperations(1, 5, nil); err != nil {
+				slog.Error("Failed to get operations", "error", err)
+			} else {
+				slog.Info("Operations data (all)", "operations", operations)
 			}
 
 			if benefits, err := client.GetBenefits(); err != nil {

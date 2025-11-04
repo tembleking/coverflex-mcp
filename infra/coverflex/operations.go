@@ -2,9 +2,12 @@ package coverflex
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 // Amount represents a monetary value and its currency.
@@ -93,8 +96,8 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 	return newAuthToken, newRefreshToken
 }
 
-// GetOperations fetches the 5 most recent operations from the API, handling token refresh.
-func (c *Client) GetOperations() ([]Operation, error) {
+// GetOperations fetches operations from the API, handling token refresh and pagination/filters.
+func (c *Client) GetOperations(page, perPage int, filters map[string]string) ([]Operation, error) {
 	slog.Info("Fetching recent operations...")
 
 	tokens, err := c.tokenRepo.GetTokens()
@@ -103,7 +106,25 @@ func (c *Client) GetOperations() ([]Operation, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", operationsURL, nil)
+	// Build URL with query parameters
+	baseURL, err := url.Parse(operationsURL)
+	if err != nil {
+		slog.Error("Error parsing operations URL", "error", err)
+		return nil, err
+	}
+	params := url.Values{}
+	if page > 0 {
+		params.Add("page", strconv.Itoa(page))
+	}
+	if perPage > 0 {
+		params.Add("per_page", strconv.Itoa(perPage))
+	}
+	for key, value := range filters {
+		params.Add(fmt.Sprintf("filters[%s]", key), value)
+	}
+	baseURL.RawQuery = params.Encode()
+
+	req, err := http.NewRequest("GET", baseURL.String(), nil)
 	if err != nil {
 		slog.Error("Error creating operations request", "error", err)
 		return nil, err
@@ -138,7 +159,7 @@ func (c *Client) GetOperations() ([]Operation, error) {
 		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			return c.GetOperations()
+			return c.GetOperations(page, perPage, filters)
 		}
 
 		err := c.tokenRepo.DeleteTokens()
