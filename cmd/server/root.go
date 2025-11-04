@@ -73,6 +73,12 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 			} else {
 				slog.Info("Cards data", "cards", cards)
 			}
+
+			if company, err := client.GetCompany(); err != nil {
+				slog.Error("Failed to get company information", "error", err)
+			} else {
+				slog.Info("Company data", "company", company)
+			}
 		} else {
 			slog.Info("Token files not found. Please log in using the --user and --pass flags.")
 		}
