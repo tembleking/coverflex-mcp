@@ -45,6 +45,12 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
+		// Check if already logged in
+		if _, err := tokenRepo.GetTokens(); err == nil {
+			slog.Info("You are already logged in. Use --force-refresh to log in again.")
+			return
+		}
+
 		if user != "" && pass != "" && otp != "" {
 			slog.Info("User, password, and OTP provided. Attempting to log in...")
 			if err := client.Login(user, pass, otp); err != nil {
