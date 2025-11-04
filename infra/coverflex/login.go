@@ -1,56 +1,16 @@
 package coverflex
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"strings"
 )
 
-// Login handles the user login process.
-func (c *Client) Login() {
-	reader := bufio.NewReader(os.Stdin)
-
-	email, password := c.getCredentials(reader)
-
-	if err := c.requestOTP(email, password); err != nil {
-		log.Fatalf("OTP request failed: %v", err)
-	}
-
-	authToken, refreshToken, err := c.submitOTP(reader, email, password)
-	if err != nil {
-		log.Fatalf("OTP submission failed: %v", err)
-	}
-
-	authToken, refreshToken = c.trustDevice(authToken, refreshToken)
-
-	if err := c.tokenRepo.SaveTokens(authToken, refreshToken); err != nil {
-		log.Fatalf("Error saving tokens: %v", err)
-	}
-
-	if authToken != "" && refreshToken != "" {
-		c.GetOperations(authToken, refreshToken)
-	}
-}
-
-func (c *Client) getCredentials(reader *bufio.Reader) (string, string) {
-	fmt.Print("Enter your email: ")
-	email, _ := reader.ReadString('\n')
-	email = strings.TrimSpace(email)
-
-	fmt.Print("Enter your password: ")
-	password, _ := reader.ReadString('\n')
-	password = strings.TrimSpace(password)
-	return email, password
-}
-
-func (c *Client) requestOTP(email, password string) error {
-	fmt.Println("Requesting OTP...")
+// RequestOTP initiates the login process by requesting an OTP.
+func (c *Client) RequestOTP(email, password string) error {
 	payload := sessionRequest{Email: email, Password: password}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
@@ -86,11 +46,23 @@ func (c *Client) requestOTP(email, password string) error {
 	return fmt.Errorf("unexpected status code during OTP request: %d\nResponse: %s", resp.StatusCode, string(bodyBytes))
 }
 
-func (c *Client) submitOTP(reader *bufio.Reader, email, password string) (string, string, error) {
-	fmt.Print("Enter the OTP you received: ")
-	otp, _ := reader.ReadString('\n')
-	otp = strings.TrimSpace(otp)
+// Login completes the authentication process using the provided OTP.
+func (c *Client) Login(email, password, otp string) error {
+	authToken, refreshToken, err := c.submitOTP(email, password, otp)
+	if err != nil {
+		return err
+	}
 
+	authToken, refreshToken = c.trustDevice(authToken, refreshToken)
+
+	if err := c.tokenRepo.SaveTokens(authToken, refreshToken); err != nil {
+		return fmt.Errorf("error saving tokens: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Client) submitOTP(email, password, otp string) (string, string, error) {
 	fmt.Println("Submitting OTP...")
 	payload := sessionRequest{Email: email, Password: password, OTP: otp}
 	payloadBytes, err := json.Marshal(payload)
@@ -137,7 +109,7 @@ func (c *Client) trustDevice(authToken, refreshToken string) (string, string) {
 	req, err := http.NewRequest("POST", trustURL, nil)
 	if err != nil {
 		log.Printf("Warning: Error creating trust request: %v", err)
-		return authToken, refreshToken // Return original tokens on error
+		return authToken, refreshToken
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+authToken)
@@ -145,7 +117,7 @@ func (c *Client) trustDevice(authToken, refreshToken string) (string, string) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		log.Printf("Warning: Error trusting device: %v", err)
-		return authToken, refreshToken // Return original tokens on error
+		return authToken, refreshToken
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -160,11 +132,9 @@ func (c *Client) trustDevice(authToken, refreshToken string) (string, string) {
 			if newTokens.UserAgentToken != "" {
 				fmt.Println("Received user agent token for long-term session.")
 			}
-			// Return new tokens
 			return newTokens.Token, newTokens.RefreshToken
 		}
 	}
 
-	// If not successful, return original tokens
 	return authToken, refreshToken
 }
