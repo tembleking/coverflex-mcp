@@ -24,13 +24,13 @@ func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultErrorFromErr("error getting cards", err), nil
 	}
 
-	return mcp.NewToolResultJSON(map[string]any{"cards": cards})
+	return mcp.NewToolResultJSON(cards)
 }
 
 func (t *ToolGetCards) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_cards",
 		mcp.WithDescription("Retrieve user cards."),
-		mcp.WithOutputSchema[map[string]any](),
+		mcp.WithOutputSchema[[]coverflex.Card](),
 	)
 
 	s.AddTool(tool, t.handle)

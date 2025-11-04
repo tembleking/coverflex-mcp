@@ -30,7 +30,7 @@ func (t *ToolGetCompany) handle(ctx context.Context, request mcp.CallToolRequest
 func (t *ToolGetCompany) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_company",
 		mcp.WithDescription("Retrieve company information."),
-		mcp.WithOutputSchema[map[string]any](),
+		mcp.WithOutputSchema[*coverflex.Company](),
 	)
 
 	s.AddTool(tool, t.handle)

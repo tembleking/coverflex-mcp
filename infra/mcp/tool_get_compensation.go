@@ -24,13 +24,13 @@ func (t *ToolGetCompensation) handle(ctx context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultErrorFromErr("error getting compensation", err), nil
 	}
 
-	return mcp.NewToolResultJSON(map[string]any{"summary": compensation})
+	return mcp.NewToolResultJSON(compensation)
 }
 
 func (t *ToolGetCompensation) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_compensation",
 		mcp.WithDescription("Retrieve user compensation summary."),
-		mcp.WithOutputSchema[map[string]any](),
+		mcp.WithOutputSchema[*coverflex.CompensationSummary](),
 	)
 
 	s.AddTool(tool, t.handle)

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "coverflex": {
+      "command": "go",
+      "args": ["run", "./cmd/server"]
+    }
+  }
+}
+
