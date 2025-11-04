@@ -30,34 +30,35 @@ type tokenResponse struct {
 	UserAgentToken string `json:"user_agent_token"`
 }
 
-type refreshRequest struct {
+// renewTokenResponse defines the structure for the /renew endpoint.
+type renewTokenData struct {
+	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
+}
+
+type renewTokenResponse struct {
+	Data renewTokenData `json:"data"`
 }
 
 // API endpoints
 const (
 	sessionURL    = "https://menhir-api.coverflex.com/api/employee/sessions"
 	trustURL      = "https://menhir-api.coverflex.com/api/employee/sessions/trust-user-agent"
-	refreshURL    = "https://menhir-api.coverflex.com/api/employee/sessions/refresh"
+	refreshURL    = "https://menhir-api.coverflex.com/api/employee/sessions/renew" // Corrected URL
 	operationsURL = "https://menhir-api.coverflex.com/api/employee/operations?per_page=5"
 )
 
 // refreshTokens handles the token refresh logic.
 func refreshTokens(refreshToken string) (newAuthToken, newRefreshToken string) {
 	fmt.Println("Attempting to refresh tokens...")
-	payload := refreshRequest{RefreshToken: refreshToken}
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		log.Printf("Error creating refresh token payload: %v", err)
-		return "", ""
-	}
 
-	req, err := http.NewRequest("POST", refreshURL, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", refreshURL, nil) // No body for this request
 	if err != nil {
 		log.Printf("Error creating refresh request: %v", err)
 		return "", ""
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+refreshToken) // Token in header
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -71,20 +72,41 @@ func refreshTokens(refreshToken string) (newAuthToken, newRefreshToken string) {
 		}
 	}()
 
-	if resp.StatusCode != http.StatusCreated { // 201
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated { // 200 or 201
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		log.Printf("Unexpected status code during token refresh: %d\nResponse: %s", resp.StatusCode, string(bodyBytes))
 		return "", ""
 	}
 
-	var tokens tokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tokens); err != nil {
+	var renewedTokens renewTokenResponse
+	if err := json.NewDecoder(resp.Body).Decode(&renewedTokens); err != nil {
 		log.Printf("Error decoding refreshed token response: %v", err)
 		return "", ""
 	}
 
-	fmt.Println("Tokens refreshed successfully.")
-	return tokens.Token, tokens.RefreshToken
+	newAuthToken = renewedTokens.Data.AccessToken
+	newRefreshToken = renewedTokens.Data.RefreshToken
+
+	if newAuthToken == "" || newRefreshToken == "" {
+		log.Println("Failed to retrieve new tokens from refresh response.")
+		return "", ""
+	}
+
+	// Save new tokens
+	tmpDir := os.TempDir()
+	tokenPath := filepath.Join(tmpDir, "coverflex_token.txt")
+	refreshTokenPath := filepath.Join(tmpDir, "coverflex_refresh_token.txt")
+
+	if err := os.WriteFile(tokenPath, []byte(newAuthToken), 0600); err != nil {
+		log.Printf("Error saving new auth token: %v", err)
+		// Continue anyway, as we have the tokens in memory
+	}
+	if err := os.WriteFile(refreshTokenPath, []byte(newRefreshToken), 0600); err != nil {
+		log.Printf("Error saving new refresh token: %v", err)
+	}
+
+	fmt.Println("Tokens refreshed and saved successfully.")
+	return newAuthToken, newRefreshToken
 }
 
 // getOperations fetches the 5 most recent operations from the API, handling token refresh.
