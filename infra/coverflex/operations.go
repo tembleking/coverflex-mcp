@@ -136,7 +136,10 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 	return newAuthToken, newRefreshToken
 }
 
-// GetOperations fetches operations from the API, handling token refresh and pagination/filters.
+// GetOperations fetches financial operations from the Coverflex API.
+// It supports pagination and filtering through functional options.
+// It automatically handles token refresh if the current token is expired.
+// It returns a slice of Operation structs or an error if the request fails.
 func (c *Client) GetOperations(opts ...GetOperationsOption) ([]Operation, error) {
 	slog.Info("Fetching recent operations...")
 

@@ -46,7 +46,10 @@ type BenefitsResponse struct {
 	Benefits []Benefit `json:"benefits"`
 }
 
-// GetBenefits fetches employee benefits from the API, handling token refresh.
+// GetBenefits fetches the employee's benefits from the Coverflex API.
+// It automatically handles token refresh if the current token is expired.
+// It returns a slice of Benefit structs containing detailed information about each benefit
+// or an error if the request fails or the response cannot be decoded.
 func (c *Client) GetBenefits() ([]Benefit, error) {
 	slog.Info("Fetching employee benefits...")
 

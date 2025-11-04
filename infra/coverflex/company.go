@@ -68,7 +68,10 @@ type CompanyResponse struct {
 	CompensationConfig CompensationConfig `json:"compensation_config"`
 }
 
-// GetCompany fetches employee company information from the API, handling token refresh.
+// GetCompany fetches the employee's company information from the Coverflex API.
+// It automatically handles token refresh if the current token is expired.
+// It returns a pointer to a CompanyResponse struct containing detailed information about the company
+// or an error if the request fails or the response cannot be decoded.
 func (c *Client) GetCompany() (*CompanyResponse, error) {
 	slog.Info("Fetching employee company information...")
 

@@ -25,7 +25,10 @@ type FamilyResponse struct {
 	Members []FamilyMember `json:"members"`
 }
 
-// GetFamily fetches employee family information from the API, handling token refresh.
+// GetFamily fetches the employee's family members from the Coverflex API.
+// It automatically handles token refresh if the current token is expired.
+// It returns a slice of FamilyMember structs containing detailed information about each family member
+// or an error if the request fails or the response cannot be decoded.
 func (c *Client) GetFamily() ([]FamilyMember, error) {
 	slog.Info("Fetching employee family information...")
 

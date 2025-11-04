@@ -33,7 +33,10 @@ type CardsResponse struct {
 	Cards []Card `json:"cards"`
 }
 
-// GetCards fetches employee cards information from the API, handling token refresh.
+// GetCards fetches the employee's cards from the Coverflex API.
+// It automatically handles token refresh if the current token is expired.
+// It returns a slice of Card structs containing detailed information about each card
+// or an error if the request fails or the response cannot be decoded.
 func (c *Client) GetCards() ([]Card, error) {
 	slog.Info("Fetching employee cards information...")
 

@@ -41,7 +41,10 @@ type CompensationResponse struct {
 	Summary CompensationSummary `json:"summary"`
 }
 
-// GetCompensation fetches employee compensation from the API, handling token refresh.
+// GetCompensation fetches the employee's compensation summary from the Coverflex API.
+// It automatically handles token refresh if the current token is expired.
+// It returns a pointer to a CompensationSummary struct containing detailed information about compensation
+// or an error if the request fails or the response cannot be decoded.
 func (c *Client) GetCompensation() (*CompensationSummary, error) {
 	slog.Info("Fetching employee compensation...")
 
