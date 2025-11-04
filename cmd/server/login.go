@@ -12,8 +12,14 @@ import (
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Log in to Coverflex",
-	Long:  `This command allows you to log in to Coverflex using your email, password, and an optional OTP. Use --force-refresh to renew tokens.`,
+	Short: "Authenticate and manage Coverflex tokens",
+	Long: `The 'login' command allows you to authenticate with Coverflex to obtain and manage access tokens.
+
+To log in, provide your email and password. If a One-Time Password (OTP) is required,
+you will be prompted to re-run the command with the '--otp' flag.
+
+Use the '--force-refresh' flag to renew your authentication tokens without re-entering credentials,
+useful when existing tokens are expired or invalid.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 		slog.SetDefault(logger)
@@ -79,10 +85,10 @@ var loginCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().String("user", "", "Your Coverflex email")
-	loginCmd.Flags().String("pass", "", "Your Coverflex password")
-	loginCmd.Flags().StringP("otp", "o", "", "The OTP you received via SMS")
-	loginCmd.Flags().Bool("force-refresh", false, "Force a refresh of the authentication tokens")
+	loginCmd.Flags().String("user", "", "Your Coverflex account email address.")
+	loginCmd.Flags().String("pass", "", "Your Coverflex account password.")
+	loginCmd.Flags().StringP("otp", "o", "", "The One-Time Password (OTP) received via SMS for 2FA.")
+	loginCmd.Flags().Bool("force-refresh", false, "Force a refresh of the authentication tokens, even if valid ones exist.")
 
 	// Here you will define your flags and configuration settings.
 
