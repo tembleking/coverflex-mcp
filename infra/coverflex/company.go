@@ -21,14 +21,14 @@ type Market struct {
 
 // Settings represents the company settings.
 type Settings struct {
-	CardRequestEmployeePermission string `json:"card_request_employee_permission"`
-	CardRequestFormat             string `json:"card_request_format"`
-	CardRequestStrategy           string `json:"card_request_strategy"`
-	CardShippingStrategy          string `json:"card_shipping_strategy"`
-	IncludeEmployeeNumberInReports bool  `json:"include_employee_number_in_reports"`
-	KinshipDegreeProofRequired    bool  `json:"kinship_degree_proof_required"`
-	Plan                          string `json:"plan"`
-	SavingsEmployeeEnabled        bool  `json:"savings_employee_enabled"`
+	CardRequestEmployeePermission  string `json:"card_request_employee_permission"`
+	CardRequestFormat              string `json:"card_request_format"`
+	CardRequestStrategy            string `json:"card_request_strategy"`
+	CardShippingStrategy           string `json:"card_shipping_strategy"`
+	IncludeEmployeeNumberInReports bool   `json:"include_employee_number_in_reports"`
+	KinshipDegreeProofRequired     bool   `json:"kinship_degree_proof_required"`
+	Plan                           string `json:"plan"`
+	SavingsEmployeeEnabled         bool   `json:"savings_employee_enabled"`
 }
 
 // TaxID represents the tax ID of a company.

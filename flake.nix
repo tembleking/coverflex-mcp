@@ -31,11 +31,12 @@
             with pkgs;
             mkShell {
               packages = [
-                go
+                cobra-cli
                 ginkgo
+                go
+                gofumpt
                 golangci-lint
                 govulncheck
-                cobra-cli
               ];
             };
 

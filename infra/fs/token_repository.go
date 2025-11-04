@@ -57,13 +57,13 @@ func (r *TokenRepository) GetTokens() (*domain.TokenPair, error) {
 
 // SaveTokens saves the tokens to the filesystem.
 func (r *TokenRepository) SaveTokens(accessToken, refreshToken string) error {
-	if err := os.WriteFile(r.tokenPath, []byte(accessToken), 0600); err != nil {
+	if err := os.WriteFile(r.tokenPath, []byte(accessToken), 0o600); err != nil {
 		return fmt.Errorf("error saving auth token: %w", err)
 	}
 	slog.Info("Auth token saved", "path", r.tokenPath)
 
 	if refreshToken != "" {
-		if err := os.WriteFile(r.refreshTokenPath, []byte(refreshToken), 0600); err != nil {
+		if err := os.WriteFile(r.refreshTokenPath, []byte(refreshToken), 0o600); err != nil {
 			return fmt.Errorf("error saving refresh token: %w", err)
 		}
 		slog.Info("Refresh token saved", "path", r.refreshTokenPath)

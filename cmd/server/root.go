@@ -18,8 +18,6 @@ your interactions with Coverflex services. It allows you to authenticate, manage
 and perform various operations directly from your terminal.
 
 Use 'coverflex-mcp [command] --help' for more information about a specific command.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 		slog.SetDefault(logger)

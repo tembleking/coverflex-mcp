@@ -23,10 +23,10 @@ type CompensationBenefit struct {
 
 // CompensationSummary is the main data structure for the compensation summary.
 type CompensationSummary struct {
-	Attributions []Attribution       `json:"attributions"`
+	Attributions []Attribution         `json:"attributions"`
 	Benefits     []CompensationBenefit `json:"benefits"`
-	RenewalDate  string              `json:"renewal_date"`
-	Status       string              `json:"status"`
+	RenewalDate  string                `json:"renewal_date"`
+	Status       string                `json:"status"`
 }
 
 // CompensationResponse is the top-level structure for the compensation API response.

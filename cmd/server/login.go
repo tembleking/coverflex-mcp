@@ -24,17 +24,15 @@ useful when existing tokens are expired or invalid.`,
 		logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 		slog.SetDefault(logger)
 
-	
-tokenRepo := fs.NewTokenRepository()
+		tokenRepo := fs.NewTokenRepository()
 		client := coverflex.NewClient(tokenRepo)
 
 		user, _ := cmd.Flags().GetString("user")
 		pass, _ := cmd.Flags().GetString("pass")
-	
-otp, _ := cmd.Flags().GetString("otp")
+
+		otp, _ := cmd.Flags().GetString("otp")
 		forceRefresh, _ := cmd.Flags().GetBool("force-refresh")
 
-		// Case 1: Force Refresh
 		if forceRefresh {
 			slog.Info("Force refresh option detected.")
 			tokens, err := tokenRepo.GetTokens()
@@ -44,15 +42,7 @@ otp, _ := cmd.Flags().GetString("otp")
 			}
 			newAuthToken, _ := client.RefreshTokens(tokens.RefreshToken)
 			if newAuthToken != "" {
-				slog.Info("\nTokens have been refreshed. Let's test the new token:")
-				if operations, err := client.GetOperations(
-					coverflex.WithOperationsPage(1),
-					coverflex.WithOperationsPerPage(5),
-				); err != nil {
-					slog.Error("Failed to get operations", "error", err)
-				} else {
-					slog.Info("Operations data", "operations", operations)
-				}
+				slog.Info("\nTokens have been refreshed.")
 			} else {
 				slog.Error("Failed to refresh tokens.")
 				os.Exit(1)
@@ -94,8 +84,8 @@ otp, _ := cmd.Flags().GetString("otp")
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().String("user", "", "Your Coverflex account email address.")
-	loginCmd.Flags().String("pass", "", "Your Coverflex account password.")
+	loginCmd.Flags().String("user", "u", "Your Coverflex account email address.")
+	loginCmd.Flags().String("pass", "p", "Your Coverflex account password.")
 	loginCmd.Flags().StringP("otp", "o", "", "The One-Time Password (OTP) received via SMS for 2FA.")
 	loginCmd.Flags().Bool("force-refresh", false, "Force a refresh of the authentication tokens, even if valid ones exist.")
 
