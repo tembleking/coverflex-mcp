@@ -60,19 +60,19 @@ func (c *Client) RefreshTokens(refreshToken string) (newAuthToken, newRefreshTok
 }
 
 // GetOperations fetches the 5 most recent operations from the API, handling token refresh.
-func (c *Client) GetOperations() {
+func (c *Client) GetOperations() ([]map[string]interface{}, error) {
 	slog.Info("Fetching recent operations...")
 
 	tokens, err := c.tokenRepo.GetTokens()
 	if err != nil {
 		slog.Error("Not logged in. Please log in first.", "error", err)
-		return
+		return nil, err
 	}
 
 	req, err := http.NewRequest("GET", operationsURL, nil)
 	if err != nil {
 		slog.Error("Error creating operations request", "error", err)
-		return
+		return nil, err
 	}
 
 	req.Header.Set("accept", "application/json, text/plain, */*")
@@ -82,7 +82,7 @@ func (c *Client) GetOperations() {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		slog.Error("Error fetching operations", "error", err)
-		return
+		return nil, err
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -92,27 +92,32 @@ func (c *Client) GetOperations() {
 
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var result interface{} // Use interface{} for arbitrary JSON structure
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			slog.Error("Error decoding operations response", "error", err)
-			return
+		var response struct {
+			Data []map[string]interface{} `json:"data"`
 		}
-		slog.Info("Operations data", "operations", result)
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			slog.Error("Error decoding operations response", "error", err)
+			return nil, err
+		}
+		return response.Data, nil
 
 	case http.StatusUnauthorized:
 		slog.Info("Token expired.")
 		newAuthToken, _ := c.RefreshTokens(tokens.RefreshToken)
 		if newAuthToken != "" {
 			// Retry the request with the new token
-			c.GetOperations()
-		} else {
-			slog.Error("Could not refresh token. Please log in again.")
-			if err := c.tokenRepo.DeleteTokens(); err != nil {
-				slog.Warn("failed to remove token files", "error", err)
-			}
+			return c.GetOperations()
 		}
+
+		err := c.tokenRepo.DeleteTokens()
+		if err != nil {
+			slog.Warn("failed to remove token files", "error", err)
+		}
+		return nil, err
+
 	default:
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		slog.Error("An HTTP error occurred", "status_code", resp.StatusCode, "response", string(bodyBytes))
+		return nil, err
 	}
 }

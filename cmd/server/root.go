@@ -29,7 +29,11 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 
 		// Default - Use existing tokens
 					if client.IsLoggedIn() {			slog.Info("Token files found. Reading tokens and fetching operations.")
-			client.GetOperations()
+			if operations, err := client.GetOperations(); err != nil {
+				slog.Error("Failed to get operations", "error", err)
+			} else {
+				slog.Info("Operations data", "operations", operations)
+			}
 		} else {
 			slog.Info("Token files not found. Please log in using the --user and --pass flags.")
 		}
