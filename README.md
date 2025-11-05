@@ -4,9 +4,9 @@ This repository contains a CLI and MCP server for interacting with Coverflex.
 
 ## Overview
 
-The `coverflex-mcp` is a command-line interface (CLI) tool designed to streamline your interactions with Coverflex services. It allows you to authenticate, manage tokens, and perform various operations directly from your terminal.
+This project is an MCP server that allows AI agents to interact with Coverflex services.
 
-It also exposes an MCP server that allows AI agents to interact with Coverflex services.
+It includes a command-line interface (CLI) primarily used for authenticating the user, which then enables the tools available in the MCP server.
 
 ## Available Tools
 
@@ -35,8 +35,24 @@ The MCP server exposes different tools depending on the user's authentication st
 -   Go 1.21 or higher
 -   Nix (optional, for development environment)
 
-### Installation
+### Usage
 
+There are two main ways to run the application.
+
+#### Using `go run` (Recommended)
+
+To run the application directly from the remote repository without a local clone:
+```sh
+# To start the MCP server
+go run github.com/tembleking/coverflex-mcp/cmd/server@latest
+
+# To log in (note the -- separator)
+go run github.com/tembleking/coverflex-mcp/cmd/server@latest -- login --user <your-email> --pass <your-password>
+```
+
+#### Building from source
+
+If you prefer to build the binary yourself:
 1.  Clone the repository:
     ```sh
     git clone https://github.com/tembleking/coverflex-mcp.git
@@ -47,29 +63,26 @@ The MCP server exposes different tools depending on the user's authentication st
     ```sh
     go build -o coverflex-mcp ./cmd/server
     ```
+This will create a `coverflex-mcp` executable in the current directory.
 
-### Usage
+### Authentication
 
-#### Authentication
+To use the MCP server, you first need to log in to your Coverflex account. If you built from source, you'll run `./coverflex-mcp`. If you are using `go run`, you'll use the command from the section above.
 
-To use the MCP server, you first need to log in to your Coverflex account.
-
+Example using the built binary:
 ```sh
 ./coverflex-mcp login --user <your-email> --pass <your-password>
 ```
 
-If Two-Factor Authentication (2FA) is enabled, you will receive an OTP on your phone. Re-run the command with the `--otp` flag:
-
-```sh
-./coverflex-mcp login --user <your-email> --pass <your-password> --otp <your-otp>
-```
+If Two-Factor Authentication (2FA) is enabled, you will receive an OTP on your phone. Re-run the command with the `--otp` flag.
 
 Once authenticated, the tool will save your tokens for future use.
 
-#### MCP Server
+### MCP Server
 
-To start the MCP server, run the following command:
+To start the MCP server, run the appropriate command for your chosen method (`go run` or the built binary).
 
+Example using the built binary:
 ```sh
 ./coverflex-mcp
 ```
