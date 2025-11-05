@@ -42,7 +42,7 @@ func (t *ToolRequestOTP) handle(ctx context.Context, request mcp.CallToolRequest
 func (t *ToolRequestOTP) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("request_otp",
 		mcp.WithDescription("Initiates the login process by requesting an OTP to be sent to the user's phone."),
-		mcp.WithOutputSchema[string](),
+		mcp.WithOutputSchema[map[string]string](),
 	)
 
 	s.AddTool(tool, t.handle)
