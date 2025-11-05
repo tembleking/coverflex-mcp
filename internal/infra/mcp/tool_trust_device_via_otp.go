@@ -46,7 +46,7 @@ func (t *ToolTrustDeviceViaOTP) handle(ctx context.Context, request mcp.CallTool
 
 func (t *ToolTrustDeviceViaOTP) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("trust_device_via_otp",
-		mcp.WithDescription("Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device."),
+		mcp.WithDescription("Submits the One-Time Password (OTP) received via SMS to complete the Coverflex login process and trust the device."),
 		mcp.WithString("otp", mcp.Description("The One-Time Password (OTP) received via SMS for 2FA.")),
 	)
 

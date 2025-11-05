@@ -29,7 +29,7 @@ func (t *ToolGetCompensation) handle(ctx context.Context, request mcp.CallToolRe
 
 func (t *ToolGetCompensation) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_compensation",
-		mcp.WithDescription("Retrieve user compensation summary."),
+		mcp.WithDescription("Retrieve Coverflex user compensation summary."),
 		mcp.WithOutputSchema[*coverflex.CompensationSummary](),
 	)
 

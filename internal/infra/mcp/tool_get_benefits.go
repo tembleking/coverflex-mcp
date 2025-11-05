@@ -29,7 +29,7 @@ func (t *ToolGetBenefits) handle(ctx context.Context, request mcp.CallToolReques
 
 func (t *ToolGetBenefits) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_benefits",
-		mcp.WithDescription("Retrieve user benefits."),
+		mcp.WithDescription("Retrieve Coverflex user benefits."),
 		mcp.WithOutputSchema[map[string][]coverflex.Benefit](),
 	)
 

@@ -29,7 +29,7 @@ func (t *ToolGetFamily) handle(ctx context.Context, request mcp.CallToolRequest)
 
 func (t *ToolGetFamily) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_family",
-		mcp.WithDescription("Retrieve user family members."),
+		mcp.WithDescription("Retrieve Coverflex user family members."),
 		mcp.WithOutputSchema[map[string][]coverflex.FamilyMember](),
 	)
 

@@ -29,7 +29,7 @@ func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) 
 
 func (t *ToolGetCards) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_cards",
-		mcp.WithDescription("Retrieve user cards."),
+		mcp.WithDescription("Retrieve Coverflex user cards."),
 		mcp.WithOutputSchema[map[string][]coverflex.Card](),
 	)
 
