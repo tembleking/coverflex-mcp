@@ -19,14 +19,13 @@ func NewToolIsLoggedIn(client *coverflex.Client) *ToolIsLoggedIn {
 }
 
 func (t *ToolIsLoggedIn) handle(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	loggedIn := t.coverflexClient.IsLoggedIn()
-	return mcp.NewToolResultJSON(loggedIn)
+	return mcp.NewToolResultJSON(map[string]bool{"isLoggedIn": t.coverflexClient.IsLoggedIn()})
 }
 
 func (t *ToolIsLoggedIn) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("is_logged_in",
 		mcp.WithDescription("Check if the user is currently logged in."),
-		mcp.WithOutputSchema[bool](),
+		mcp.WithOutputSchema[map[string]bool](),
 	)
 
 	s.AddTool(tool, t.handle)
