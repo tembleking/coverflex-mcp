@@ -8,28 +8,19 @@ The `coverflex-mcp` is a command-line interface (CLI) tool designed to streamlin
 
 It also exposes an MCP server that allows AI agents to interact with Coverflex services.
 
-## Packages
+## Available Tools
 
-### `cmd/server`
+The MCP server exposes the following tools:
 
-This package contains the entry point of the application.
-
--   **`root.go`**: Defines the root command `coverflex-mcp`, sets up the MCP server with all the available tools, and initializes the application.
--   **`login.go`**: Implements the `login` command, which handles authentication, token management, OTP verification, and token refresh logic.
--   **`main.go`**: The main function that executes the root command.
-
-### `infra/mcp`
-
-This package is responsible for the MCP server and its tools.
-
--   **`mcp_handler.go`**: Sets up the MCP server and registers the tools. It dynamically registers tools based on the user's login status.
--   **`tool_*.go`**: Each file implements a specific MCP tool for interacting with the Coverflex API. These tools cover functionalities like retrieving benefits, cards, company information, compensation, family members, and operations. There are also tools for authentication, such as checking the login status, requesting an OTP, and trusting a device via OTP.
-
-### `infra/fs`
-
-This package handles the persistence of authentication tokens.
-
--   **`token_repository.go`**: Implements a token repository that stores and retrieves authentication and refresh tokens from the filesystem. The tokens are stored in the system's temporary directory.
+-   **`get_benefits`**: Retrieve user benefits.
+-   **`get_cards`**: Retrieve user cards.
+-   **`get_company`**: Retrieve company information.
+-   **`get_compensation`**: Retrieve user compensation summary.
+-   **`get_family`**: Retrieve user family members.
+-   **`get_operations`**: Retrieve user operations with optional pagination and filtering.
+-   **`is_logged_in`**: Check if the user is currently logged in.
+-   **`request_otp`**: Initiates the login process by requesting an OTP to be sent to the user's phone.
+-   **`trust_device_via_otp`**: Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device.
 
 ## Getting Started
 
