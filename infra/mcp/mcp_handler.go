@@ -21,7 +21,12 @@ func NewHandler() *Handler {
 	s := server.NewMCPServer(
 		"Coverflex MCP Server",
 		"1.0.0",
-		server.WithInstructions("Provides Coverflex tools and resources."),
+		server.WithInstructions(`You are a helpful assistant for managing Coverflex benefits. You have access to a set of tools to retrieve information about the user's benefits, cards, company details, and more.
+
+If no tools are available, it means the user is not logged in. To help the user, follow these steps:
+1. First, check if the 'COVERFLEX_USERNAME' and 'COVERFLEX_PASSWORD' environment variables are set.
+2. If the environment variables are set but the user is not logged in, the device may not be trusted. In this case, suggest using the 'trust_device' tool with the OTP.
+3. If the environment variables are not set, guide the user to authenticate manually by running the 'login' command with the '--user' and '--pass' flags.`),
 		server.WithToolCapabilities(true),
 	)
 	return &Handler{
