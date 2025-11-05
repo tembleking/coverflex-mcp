@@ -27,11 +27,6 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 		tokenRepo := fs.NewTokenRepository()
 		client := coverflex.NewClient(tokenRepo)
 
-		if !client.IsLoggedIn() {
-			slog.Info("Token files not found. Please log in using the 'login' command.")
-			return
-		}
-
 		handler := mcp.NewHandlerWithTools(
 			mcp.NewToolGetBenefits(client),
 			mcp.NewToolGetCards(client),
@@ -39,6 +34,8 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 			mcp.NewToolGetCompensation(client),
 			mcp.NewToolGetFamily(client),
 			mcp.NewToolGetOperations(client),
+			mcp.NewToolTrustDevice(client),
+			mcp.NewToolIsLoggedIn(client),
 		)
 
 		if err := handler.ServeStdio(context.Background(), os.Stdin, os.Stdout); err != nil {
