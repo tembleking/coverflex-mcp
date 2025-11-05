@@ -84,8 +84,8 @@ useful when existing tokens are expired or invalid.`,
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().String("user", "u", "Your Coverflex account email address.")
-	loginCmd.Flags().String("pass", "p", "Your Coverflex account password.")
+	loginCmd.Flags().StringP("user", "u", "", "Your Coverflex account email address.")
+	loginCmd.Flags().StringP("pass", "p", "", "Your Coverflex account password.")
 	loginCmd.Flags().StringP("otp", "o", "", "The One-Time Password (OTP) received via SMS for 2FA.")
 	loginCmd.Flags().Bool("force-refresh", false, "Force a refresh of the authentication tokens, even if valid ones exist.")
 
