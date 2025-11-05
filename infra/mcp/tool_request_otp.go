@@ -28,7 +28,7 @@ func (t *ToolRequestOTP) handle(ctx context.Context, request mcp.CallToolRequest
 	}
 
 	if t.coverflexClient.IsLoggedIn() {
-		return mcp.NewToolResultText("already logged in"), nil
+		return mcp.NewToolResultJSON(map[string]string{"result": "already logged in"})
 	}
 
 	err := t.coverflexClient.RequestOTP(user, pass)
@@ -36,7 +36,7 @@ func (t *ToolRequestOTP) handle(ctx context.Context, request mcp.CallToolRequest
 		return mcp.NewToolResultErrorFromErr("error requesting OTP", err), nil
 	}
 
-	return mcp.NewToolResultText("OTP requested successfully. Please provide the OTP using the 'trust_device' tool."), nil
+	return mcp.NewToolResultJSON(map[string]string{"result": "OTP requested successfully. Please provide the OTP using the 'trust_device_via_otp' tool."})
 }
 
 func (t *ToolRequestOTP) RegisterInServer(s *server.MCPServer) {
