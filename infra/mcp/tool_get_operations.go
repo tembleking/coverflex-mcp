@@ -44,7 +44,7 @@ func (t *ToolGetOperations) handle(ctx context.Context, request mcp.CallToolRequ
 
 func (t *ToolGetOperations) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_operations",
-		mcp.WithDescription("Retrieve user operations with optional pagination and filtering. To retrieve all operations, the LLM needs to paginate."),
+		mcp.WithDescription("Retrieve user operations with optional pagination and filtering. To retrieve all operations, the LLM needs to paginate. Note: 'rollover' and 'rollover top-up' operations are internal transfers of funds between different benefit categories."),
 		mcp.WithNumber("page", mcp.Description("The page number for pagination."), mcp.DefaultNumber(1)),
 		mcp.WithNumber("per_page", mcp.Description("The number of items per page."), mcp.DefaultNumber(20)),
 		mcp.WithString("filter_type", mcp.Description("The type of operation to filter by.")),
