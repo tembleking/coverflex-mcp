@@ -21,7 +21,7 @@ you will be prompted to re-run the command with the '--otp' flag.
 Use the '--force-refresh' flag to renew your authentication tokens without re-entering credentials,
 useful when existing tokens are expired or invalid.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+		logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 		slog.SetDefault(logger)
 
 		tokenRepo := fs.NewTokenRepository()
