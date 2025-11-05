@@ -11,7 +11,7 @@
     }:
     let
       overlays.default = final: prev: {
-        # packageName = prev.callPackage ./package.nix {};
+        coverflex-mcp = prev.callPackage ./package.nix { };
       };
       flake = flake-utils.lib.eachDefaultSystem (
         system:
@@ -23,10 +23,10 @@
           };
         in
         {
-          # packages = with pkgs; {
-          #   inherit packageName;
-          #   default = packageName;
-          # };
+          packages = with pkgs; {
+            inherit coverflex-mcp;
+            default = coverflex-mcp;
+          };
           devShells.default =
             with pkgs;
             mkShell {
@@ -37,6 +37,8 @@
                 gofumpt
                 golangci-lint
                 govulncheck
+                just
+                sd
               ];
             };
 
