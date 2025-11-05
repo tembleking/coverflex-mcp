@@ -18,7 +18,7 @@ func NewToolGetCards(client *coverflex.Client) *ToolGetCards {
 	}
 }
 
-func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) (*m.CallToolResult, error) {
+func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	cards, err := t.coverflexClient.GetCards()
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("error getting cards", err), nil
