@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/tembleking/coverflex-mcp/infra/coverflex"
-	"github.com/tembleking/coverflex-mcp/infra/fs"
-	"github.com/tembleking/coverflex-mcp/infra/mcp"
+	"github.com/tembleking/coverflex-mcp/internal/infra/coverflex"
+	"github.com/tembleking/coverflex-mcp/internal/infra/fs"
+	"github.com/tembleking/coverflex-mcp/internal/infra/mcp"
 )
 
 // rootCmd represents the base command when called without any subcommands

@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/tembleking/coverflex-mcp/domain"
+	"github.com/tembleking/coverflex-mcp/internal/domain"
 )
 
 // API endpoints

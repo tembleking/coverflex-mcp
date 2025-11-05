@@ -5,7 +5,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/tembleking/coverflex-mcp/infra/coverflex"
+	"github.com/tembleking/coverflex-mcp/internal/infra/coverflex"
 )
 
 type ToolGetCompensation struct {

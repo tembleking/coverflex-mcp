@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tembleking/coverflex-mcp/domain"
+	"github.com/tembleking/coverflex-mcp/internal/domain"
 )
 
 const (
