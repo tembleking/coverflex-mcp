@@ -9,17 +9,17 @@ import (
 	"github.com/tembleking/coverflex-mcp/infra/coverflex"
 )
 
-type ToolTrustDevice struct {
+type ToolTrustDeviceViaOTP struct {
 	coverflexClient *coverflex.Client
 }
 
-func NewToolTrustDevice(client *coverflex.Client) *ToolTrustDevice {
-	return &ToolTrustDevice{
+func NewToolTrustDeviceViaOTP(client *coverflex.Client) *ToolTrustDeviceViaOTP {
+	return &ToolTrustDeviceViaOTP{
 		coverflexClient: client,
 	}
 }
 
-func (t *ToolTrustDevice) handle(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (t *ToolTrustDeviceViaOTP) handle(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	otp := request.GetString("otp", "")
 	if otp == "" {
 		return mcp.NewToolResultError("otp is required"), nil
@@ -44,8 +44,8 @@ func (t *ToolTrustDevice) handle(ctx context.Context, request mcp.CallToolReques
 	return mcp.NewToolResultText("OTP submitted successfully. Device trusted."), nil
 }
 
-func (t *ToolTrustDevice) RegisterInServer(s *server.MCPServer) {
-	tool := mcp.NewTool("trust_device",
+func (t *ToolTrustDeviceViaOTP) RegisterInServer(s *server.MCPServer) {
+	tool := mcp.NewTool("trust_device_via_otp",
 		mcp.WithDescription("Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device."),
 		mcp.WithString("otp", mcp.Description("The One-Time Password (OTP) received via SMS for 2FA.")),
 		mcp.WithOutputSchema[string](),
@@ -54,6 +54,6 @@ func (t *ToolTrustDevice) RegisterInServer(s *server.MCPServer) {
 	s.AddTool(tool, t.handle)
 }
 
-func (t *ToolTrustDevice) CanBeUsed() bool {
+func (t *ToolTrustDeviceViaOTP) CanBeUsed() bool {
 	return t.coverflexClient != nil && !t.coverflexClient.IsLoggedIn()
 }
