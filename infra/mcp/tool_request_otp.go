@@ -36,13 +36,12 @@ func (t *ToolRequestOTP) handle(ctx context.Context, request mcp.CallToolRequest
 		return mcp.NewToolResultErrorFromErr("error requesting OTP", err), nil
 	}
 
-	return mcp.NewToolResultText("OTP requested successfully. Please provide the OTP using the 'trust_device_via_otp' tool."), nil
+	return mcp.NewToolResultText("OTP requested successfully. Please let the user provide the OTP and configure it using the 'trust_device_via_otp' tool."), nil
 }
 
 func (t *ToolRequestOTP) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("request_otp",
 		mcp.WithDescription("Initiates the login process by requesting an OTP to be sent to the user's phone."),
-		mcp.WithOutputSchema[string](),
 	)
 
 	s.AddTool(tool, t.handle)

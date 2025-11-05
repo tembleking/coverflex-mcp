@@ -41,14 +41,13 @@ func (t *ToolTrustDeviceViaOTP) handle(ctx context.Context, request mcp.CallTool
 		return mcp.NewToolResultErrorFromErr("error submitting OTP", err), nil
 	}
 
-	return mcp.NewToolResultText("OTP submitted successfully. Device trusted."), nil
+	return mcp.NewToolResultText("OTP submitted successfully. Device trusted, refresh the MCP servers to see the available tools."), nil
 }
 
 func (t *ToolTrustDeviceViaOTP) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("trust_device_via_otp",
 		mcp.WithDescription("Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device."),
 		mcp.WithString("otp", mcp.Description("The One-Time Password (OTP) received via SMS for 2FA.")),
-		mcp.WithOutputSchema[string](),
 	)
 
 	s.AddTool(tool, t.handle)
