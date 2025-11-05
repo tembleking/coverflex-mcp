@@ -24,7 +24,7 @@ func (t *ToolGetBenefits) handle(ctx context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultErrorFromErr("error getting benefits", err), nil
 	}
 
-	return mcp.NewToolResultJSON(map[string][]coverflex.Benefit{"structuredContent": benefits})
+	return mcp.NewToolResultJSON(map[string][]coverflex.Benefit{"result": benefits})
 }
 
 func (t *ToolGetBenefits) RegisterInServer(s *server.MCPServer) {

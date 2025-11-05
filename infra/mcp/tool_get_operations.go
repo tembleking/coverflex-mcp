@@ -39,7 +39,7 @@ func (t *ToolGetOperations) handle(ctx context.Context, request mcp.CallToolRequ
 		return mcp.NewToolResultErrorFromErr("error getting operations", err), nil
 	}
 
-	return mcp.NewToolResultJSON(map[string][]coverflex.Operation{"structuredContent": operations})
+	return mcp.NewToolResultJSON(map[string][]coverflex.Operation{"result": operations})
 }
 
 func (t *ToolGetOperations) RegisterInServer(s *server.MCPServer) {

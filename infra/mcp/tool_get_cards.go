@@ -24,7 +24,7 @@ func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultErrorFromErr("error getting cards", err), nil
 	}
 
-	return mcp.NewToolResultJSON(map[string][]coverflex.Card{"structuredContent": cards})
+	return mcp.NewToolResultJSON(map[string][]coverflex.Card{"result": cards})
 }
 
 func (t *ToolGetCards) RegisterInServer(s *server.MCPServer) {
