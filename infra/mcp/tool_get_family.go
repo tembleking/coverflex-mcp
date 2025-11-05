@@ -24,13 +24,13 @@ func (t *ToolGetFamily) handle(ctx context.Context, request mcp.CallToolRequest)
 		return mcp.NewToolResultErrorFromErr("error getting family members", err), nil
 	}
 
-	return mcp.NewToolResultJSON(family)
+	return mcp.NewToolResultJSON(map[string][]coverflex.FamilyMember{"structuredContent": family})
 }
 
 func (t *ToolGetFamily) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_family",
 		mcp.WithDescription("Retrieve user family members."),
-		mcp.WithOutputSchema[[]coverflex.FamilyMember](),
+		mcp.WithOutputSchema[map[string][]coverflex.FamilyMember](),
 	)
 
 	s.AddTool(tool, t.handle)

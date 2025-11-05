@@ -39,7 +39,7 @@ func (t *ToolGetOperations) handle(ctx context.Context, request mcp.CallToolRequ
 		return mcp.NewToolResultErrorFromErr("error getting operations", err), nil
 	}
 
-	return mcp.NewToolResultJSON(operations)
+	return mcp.NewToolResultJSON(map[string][]coverflex.Operation{"structuredContent": operations})
 }
 
 func (t *ToolGetOperations) RegisterInServer(s *server.MCPServer) {
@@ -48,7 +48,7 @@ func (t *ToolGetOperations) RegisterInServer(s *server.MCPServer) {
 		mcp.WithNumber("page", mcp.Description("The page number for pagination.")),
 		mcp.WithNumber("per_page", mcp.Description("The number of items per page.")),
 		mcp.WithString("filter_type", mcp.Description("The type of operation to filter by.")),
-		mcp.WithOutputSchema[[]coverflex.Operation](),
+		mcp.WithOutputSchema[map[string][]coverflex.Operation](),
 	)
 
 	s.AddTool(tool, t.handle)

@@ -18,19 +18,19 @@ func NewToolGetCards(client *coverflex.Client) *ToolGetCards {
 	}
 }
 
-func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (t *ToolGetCards) handle(ctx context.Context, request mcp.CallToolRequest) (*m.CallToolResult, error) {
 	cards, err := t.coverflexClient.GetCards()
 	if err != nil {
 		return mcp.NewToolResultErrorFromErr("error getting cards", err), nil
 	}
 
-	return mcp.NewToolResultJSON(cards)
+	return mcp.NewToolResultJSON(map[string][]coverflex.Card{"structuredContent": cards})
 }
 
 func (t *ToolGetCards) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("get_cards",
 		mcp.WithDescription("Retrieve user cards."),
-		mcp.WithOutputSchema[[]coverflex.Card](),
+		mcp.WithOutputSchema[map[string][]coverflex.Card](),
 	)
 
 	s.AddTool(tool, t.handle)
