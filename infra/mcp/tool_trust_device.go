@@ -38,15 +38,15 @@ func (t *ToolTrustDevice) handle(ctx context.Context, request mcp.CallToolReques
 
 	err := t.coverflexClient.Login(user, pass, otp)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("error logging in", err), nil
+		return mcp.NewToolResultErrorFromErr("error submitting OTP", err), nil
 	}
 
-	return mcp.NewToolResultText("login successful"), nil
+	return mcp.NewToolResultText("OTP submitted successfully. Device trusted."), nil
 }
 
 func (t *ToolTrustDevice) RegisterInServer(s *server.MCPServer) {
 	tool := mcp.NewTool("trust_device",
-		mcp.WithDescription("Trust the device by providing the OTP sent to your phone. It uses COVERFLEX_USERNAME and COVERFLEX_PASSWORD environment variables to login."),
+		mcp.WithDescription("Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device."),
 		mcp.WithString("otp", mcp.Description("The One-Time Password (OTP) received via SMS for 2FA.")),
 		mcp.WithOutputSchema[string](),
 	)

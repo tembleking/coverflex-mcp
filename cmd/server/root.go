@@ -36,6 +36,7 @@ Use 'coverflex-mcp [command] --help' for more information about a specific comma
 			mcp.NewToolGetOperations(client),
 			mcp.NewToolTrustDevice(client),
 			mcp.NewToolIsLoggedIn(client),
+			mcp.NewToolRequestOTP(client),
 		)
 
 		if err := handler.ServeStdio(context.Background(), os.Stdin, os.Stdout); err != nil {
