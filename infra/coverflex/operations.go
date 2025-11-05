@@ -145,7 +145,7 @@ func (c *Client) GetOperations(opts ...GetOperationsOption) ([]Operation, error)
 
 	params := &GetOperationsParams{
 		Page:    1,
-		PerPage: 50,
+		PerPage: 20,
 	}
 	for _, opt := range opts {
 		opt(params)
