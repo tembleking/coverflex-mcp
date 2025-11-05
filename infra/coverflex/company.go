@@ -39,15 +39,15 @@ type TaxID struct {
 
 // Company represents the company information.
 type Company struct {
-	ID              string    `json:"id"`
+	ID              string    `json:"id,omitempty"`
 	Addresses       []Address `json:"addresses,omitempty"`
-	CardDisplayName string    `json:"card_display_name"`
-	LegalName       string    `json:"legal_name"`
-	LogoURI         *string   `json:"logo_uri"`
-	Market          Market    `json:"market"`
-	Name            string    `json:"name"`
-	Settings        Settings  `json:"settings"`
-	TaxID           TaxID     `json:"tax_id"`
+	CardDisplayName string    `json:"card_display_name,omitempty"`
+	LegalName       string    `json:"legal_name,omitempty"`
+	LogoURI         *string   `json:"logo_uri,omitempty"`
+	Market          Market    `json:"market,omitempty"`
+	Name            string    `json:"name,omitempty"`
+	Settings        Settings  `json:"settings,omitempty"`
+	TaxID           TaxID     `json:"tax_id,omitempty"`
 }
 
 // CompensationConfig represents the compensation configuration for a company.
