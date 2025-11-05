@@ -40,7 +40,7 @@ type TaxID struct {
 // Company represents the company information.
 type Company struct {
 	ID              string    `json:"id"`
-	Addresses       []Address `json:"addresses"`
+	Addresses       []Address `json:"addresses,omitempty"`
 	CardDisplayName string    `json:"card_display_name"`
 	LegalName       string    `json:"legal_name"`
 	LogoURI         *string   `json:"logo_uri"`
