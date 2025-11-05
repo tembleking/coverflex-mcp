@@ -10,17 +10,23 @@ It also exposes an MCP server that allows AI agents to interact with Coverflex s
 
 ## Available Tools
 
-The MCP server exposes the following tools:
+The MCP server exposes different tools depending on the user's authentication status.
 
+### When Logged Out
+
+-   **`is_logged_in`**: Check if the user is currently logged in.
+-   **`request_otp`**: Initiates the login process by requesting an OTP to be sent to the user's phone.
+-   **`trust_device_via_otp`**: Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device.
+
+### When Logged In
+
+-   **`is_logged_in`**: Check if the user is currently logged in.
 -   **`get_benefits`**: Retrieve user benefits.
 -   **`get_cards`**: Retrieve user cards.
 -   **`get_company`**: Retrieve company information.
 -   **`get_compensation`**: Retrieve user compensation summary.
 -   **`get_family`**: Retrieve user family members.
 -   **`get_operations`**: Retrieve user operations with optional pagination and filtering.
--   **`is_logged_in`**: Check if the user is currently logged in.
--   **`request_otp`**: Initiates the login process by requesting an OTP to be sent to the user's phone.
--   **`trust_device_via_otp`**: Submits the One-Time Password (OTP) received via SMS to complete the login process and trust the device.
 
 ## Getting Started
 
